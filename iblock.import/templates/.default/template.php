@@ -24,21 +24,3 @@ $this->addExternalJS("https://code.jquery.com/jquery-3.2.1.min.js");
     )
 );?>
 
-<!--
---><?/*$APPLICATION->IncludeComponent(
-    "bitrix:news",
-    "",
-    Array(
-        "CATEGORY_IBLOCK" => array("2"),
-        "IBLOCK_ID" => "2",
-        "IBLOCK_TYPE" => "news",
-        "INCLUDE_IBLOCK_INTO_CHAIN" => "N",
-        "LIST_ACTIVE_DATE_FORMAT" => "d.m.Y",
-        "NUM_DAYS" => "360",
-        "NUM_NEWS" => "120",
-        "PREVIEW_TRUNCATE_LEN" => "0",
-        "SEF_FOLDER" => "/imported-news/",
-        "SEF_URL_TEMPLATES" => Array("detail"=>"#SECTION_CODE#/#ELEMENT_CODE#/","news"=>"","rss"=>"rss/","rss_section"=>"#SECTION_ID#/rss/","search"=>"search/","section"=>"#SECTION_СODE#/"),
-    )
-);*/?>
-

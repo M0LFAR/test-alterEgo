@@ -10,17 +10,17 @@ $APPLICATION->IncludeComponent(
     ".default",
     Array(
         "SITE" => "http://k.img.com.ua",
-        "PORT" =>80,
+        "PORT" => 80,
         "PATH" => "/rss/ru/all_news2.0.xml",
         "IBLOCK_SELECTOR"=>'item',
         "IBLOCK_ID"=>2,
+        "TYPE_ANSWER"=>$_GET['type_answer'],
         "IBLOCK_PROPERTY_IN_DOM"=>array(
             "DETAIL_TEXT"=>"description",
             "NAME"=>"title",
             "DETAIL_PICTURE"=>"enclosure",
             "SECTION_NAME" =>"category"
             ),
-        "SAVE_TO_IBLOCK" => true
     ),
     false
 );

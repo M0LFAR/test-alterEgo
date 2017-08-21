@@ -28,11 +28,11 @@ class IblockRssImport extends CBitrixComponent{
 
         if ($this->arParams['TYPE_ANSWER']=='json'){
 
-           $this->export() && $this->saveIblock();
+           $this->export() && $this->saveIblocks();
 
             $GLOBALS['APPLICATION']->RestartBuffer();
 
-           echo  $this->arResult = json_encode($this->arResult['newIblocksFeed']);
+           echo  json_encode($this->arResult['newIblocksFeed']);
 
            exit();
 
@@ -49,9 +49,6 @@ class IblockRssImport extends CBitrixComponent{
 
         $arParams = array_replace($this->defaultParams, $arParams);
 
-        $request = Bitrix\Main\Context::getCurrent()->getRequest();
-        $curDir = $request->getRequestedPageDirectory();
-
         $this->arResult['lastUpdate'] = COption::GetOptionInt("news", "last_update");
 
         $this->iblock = new CIBlockElement();
@@ -65,22 +62,23 @@ class IblockRssImport extends CBitrixComponent{
 
         $arXML= CIBlockRSS::GetNewsEx($this->arParams["SITE"], $this->arParams["PORT"], $this->arParams["PATH"], $this->arParams["QUERY_STR"]);
 
-        if(count($arXML) > 0)
-        {
+        if(count($arXML) > 0){
             $this->feedExport = CIBlockRSS::FormatArray($arXML);
             $this->title = $this->feedExport ["title"];
         }
-        
-        $this->arResult['newIblocksFeed']['lastUpdate'] = $this->arResult['lastUpdate'] = time();
 
-        COption::SetOptionInt("news", "last_update", $this->arResult['lastUpdate']);
+        if($status = (bool)$this->feedExport) {
 
+            $this->arResult['newIblocksFeed']['lastUpdate'] = $this->arResult['lastUpdate'] = time();
 
-        return (bool)$this->feedExport;
+            COption::SetOptionInt("news", "last_update", $this->arResult['lastUpdate']);
+
+        }
+        return $status;
     }
 
 
-    private function saveIblock(){
+    private function saveIblocks(){
 
         $selector = $this->arParams['IBLOCK_SELECTOR'];
         $feedItems =$this->feedExport[$selector];
@@ -88,33 +86,36 @@ class IblockRssImport extends CBitrixComponent{
         $paramsSelect = $this->arParams['IBLOCK_PROPERTY_IN_DOM'];
         $needSelectorField = array_flip($paramsSelect);
 
-        if (is_array($feedItems))
-        foreach ($feedItems as $feedNode){
-            $gettingValues = array_intersect_key($feedNode, $needSelectorField);
+        if (is_array($feedItems)) {
+
+            foreach ($feedItems as $feedNode) {
+                $gettingValues = array_intersect_key($feedNode, $needSelectorField);
 
 
-            foreach ($paramsSelect as $property => $feedSelector){
-                $selectedValue[$property] = $gettingValues[$feedSelector];
-            }
+                foreach ($paramsSelect as $property => $feedSelector) {
+                    $iblockField[$property] = $gettingValues[$feedSelector];
+                }
 
 
-            $selectedValue = array_merge(
-                (array)$selectedValue,
-                array(
-                    "IBLOCK_SECTION_ID" => $this->getSectionId($selectedValue["SECTION_NAME"], $this->arParams['IBLOCK_ID']),
-                    "CODE"  => $this->translitWord($selectedValue["NAME"]),
-                    "ACTIVE"         => "Y",
-                    "IBLOCK_ID"      => $this->arParams['IBLOCK_ID'],
-                    "DETAIL_PICTURE" =>$selectedValue["DETAIL_PICTURE"]["url"]
-                )
-            );
+                $iblockField = array_merge(
+                    (array)$iblockField,
+                    array(
+                        "IBLOCK_SECTION_ID" => $this->getSectionId($iblockField["SECTION_NAME"], $this->arParams['IBLOCK_ID']),
+                        "CODE" => self::translitWord($iblockField["NAME"]),
+                        "ACTIVE" => "Y",
+                        "IBLOCK_ID" => $this->arParams['IBLOCK_ID'],
+                        "DETAIL_PICTURE" => $iblockField["DETAIL_PICTURE"]["url"]
+                    )
+                );
 
-                if($this->iblock->Add($selectedValue )) { //оскільки символьний код гарантує унікальність то інфо блоки не будуть добавлені повторно
-                    $feedNode['link'] = $this->translitWord($selectedValue["SECTION_NAME"]).'/'.$selectedValue["CODE"];
+
+                if ($this->iblock->Add($iblockField)) { //оскільки символьний код гарантує унікальність то інфоблоки не будуть добавлені повторно
+                    $feedNode['link'] = self::translitWord($iblockField["SECTION_NAME"]) . '/' . $iblockField["CODE"];
                     $this->arResult['newIblocksFeed']['elements'][] = $feedNode;
                 }
 
             }
+        }
     }
 
 
@@ -130,7 +131,7 @@ class IblockRssImport extends CBitrixComponent{
                 "ACTIVE" => 'Y',
                 "IBLOCK_ID" => $iblockId,
                 "NAME" => $name,
-                "CODE" => $this->translitWord($name)
+                "CODE" => self::translitWord($name)
             );
 
             $idSection = $this->section->Add($arFields);
@@ -139,11 +140,11 @@ class IblockRssImport extends CBitrixComponent{
     }
 
 
-    private function translitWord($word=''){
+    static function translitWord($word=''){
 
         $arParams = array("replace_space"=>"-","replace_other"=>"-");
-        $trans = Cutil::translit($word,"ru",$arParams);
+        return Cutil::translit($word,"ru",$arParams);
 
-        return $trans;
     }
+
 }

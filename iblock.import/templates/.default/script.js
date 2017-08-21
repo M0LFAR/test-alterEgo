@@ -6,24 +6,25 @@ $(document).ready(function() {
             data: {
                 type_answer: 'json'
             },
-            success: function (itemsIblock ) {
+            success: function (itemsIblock) {
+                itemsIblock = $.parseJSON(itemsIblock);
                 var domElements='';
-                var lastUpdate = new Date(itemsIblock.lastUpdate);
-                console.log(lastUpdate,itemsIblock.lastUpdate);
+                var lastUpdate = new Date(1000*itemsIblock.lastUpdate);
+
                 $.each(itemsIblock.elements, function (number, elementDom) {
-                    //console.log(elementDom, elementDom.link);
+
                     var link = elementDom.link;
                     var title = elementDom.title;
 
-                    domElements += `<p class="news-item" style="background: cornflowerblue;">
-                                           <a href="//${link}">
+                    domElements += `<p class="news-item" style="background: #f5f5f5;">
+                                           <a href="${link}">
                                                 <b>${title}</b>
                                             </a>
                                    </p>`;
                 });
 
                 $(".news-list").prepend(domElements);
-                //$("#last-update").html(lasUpdate.toString());
+                $("#last-update").html(lastUpdate.toLocaleString());
             },
             error: function(xhr) {
              alert(xhr);

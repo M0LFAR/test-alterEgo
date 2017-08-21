@@ -4,7 +4,7 @@ $this->addExternalJS("https://code.jquery.com/jquery-3.2.1.min.js");
 ?>
 
 <button id="refresh">Обновить</button>
-Последнее обновление: <?=date("Y-m-d H:i", $arResult['lastUpdate']);?>
+Последнее обновление: <span id="last-update"><?=date("Y-m-d H:i", $arResult['lastUpdate']);?></span>
 
 <?$APPLICATION->IncludeComponent(
     "bitrix:news",
